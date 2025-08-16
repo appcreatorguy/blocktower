@@ -12,14 +12,15 @@ import dev.alphacerium.advancedgroups.AdvancedGroupCommands
 import dev.alphacerium.blocktower.Blocktower
 import dev.alphacerium.blocktower.BlocktowerVoicechatPlugin
 import dev.alphacerium.blocktower.config.PrivateRoom
-import net.minecraft.ChatFormatting
-import net.minecraft.commands.CommandSourceStack
-import net.minecraft.core.BlockPos
-import net.minecraft.network.chat.ClickEvent
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.ComponentUtils
-import net.minecraft.network.chat.HoverEvent
-import java.util.UUID
+import net.minecraft.server.command.ServerCommandSource
+import net.minecraft.text.ClickEvent
+import net.minecraft.text.HoverEvent
+import net.minecraft.text.Style
+import net.minecraft.text.Text
+import net.minecraft.text.Texts
+import net.minecraft.util.Formatting
+import net.minecraft.util.math.BlockPos
+import java.util.*
 
 @Command(PrivateRoomCommands.PRIVATE_ROOM_COMMAND)
 class PrivateRoomCommands {
@@ -29,14 +30,14 @@ class PrivateRoomCommands {
 
     @Command("add")
     fun add(
-        context: CommandContext<CommandSourceStack>,
+        context: CommandContext<ServerCommandSource>,
         @Name("name") name: String,
         @Name("password") password: String,
         @Name("entrance") entrance: BlockPos,
         @Name("exit") exit: BlockPos
     ): Int {
         if (name.isBlank()) {
-            context.source.sendFailure(Component.literal("Name cannot be blank"))
+            context.source.sendError(Text.literal("Name cannot be blank"))
             return 0
         }
         if (AdvancedGroupCommands.PERSISTENT_GROUP_STORE.getGroup(name) == null) {
@@ -53,66 +54,63 @@ class PrivateRoomCommands {
         val privateRoom = PrivateRoom(name, entrance, exit, persistentGroup, null)
         Blocktower.PRIVATE_ROOM_STORE.addPrivateRoom(privateRoom)
 
-        context.source.sendSuccess({ Component.literal("Successfully created persistent group $name") }, false)
+        context.source.sendFeedback({ Text.literal("Successfully created persistent group $name") }, false)
         return 1
     }
 
     @Command("remove")
     fun remove(
-        context: CommandContext<CommandSourceStack>,
-        @Name("name") name: String
+        context: CommandContext<ServerCommandSource>,
+        @Name("id") id: UUID
     ): Int {
-        val privateRoom = Blocktower.PRIVATE_ROOM_STORE.getPrivateRoom(name)
-        if (privateRoom != null) {
-            Blocktower.PRIVATE_ROOM_STORE.removePrivateRoom(privateRoom)
-            context.source.sendSuccess({ Component.literal("Successfully removed private room $name") }, false)
-            return 1
-        } else {
-            context.source.sendFailure(Component.literal("Private room $name not found"))
+        val privateRoom = Blocktower.PRIVATE_ROOM_STORE.getPrivateRoom(id)
+        if (privateRoom == null) {
+            context.source.sendError(Text.literal("Private room with id $id not found"))
             return 0
         }
+        Blocktower.PRIVATE_ROOM_STORE.removePrivateRoom(privateRoom)
+        return 1
     }
 
     @Command("remove")
     fun remove(
-        context: CommandContext<CommandSourceStack>,
-        @Name("id") id: UUID
+        context: CommandContext<ServerCommandSource>,
+        @Name("name") name: String
     ): Int {
-        val privateRoom = Blocktower.PRIVATE_ROOM_STORE.getPrivateRoom(id)
-        if (privateRoom != null) {
-            Blocktower.PRIVATE_ROOM_STORE.removePrivateRoom(privateRoom)
-            context.source.sendSuccess({ Component.literal("Successfully removed private room $id") }, false)
-            return 1
-        } else {
-            context.source.sendFailure(Component.literal("Private room $id not found"))
+        val privateRoom = Blocktower.PRIVATE_ROOM_STORE.getPrivateRoom(name)
+        if (privateRoom == null) {
+            context.source.sendError(Text.literal("Private room with name $name not found"))
             return 0
         }
+        Blocktower.PRIVATE_ROOM_STORE.removePrivateRoom(privateRoom)
+        return 1
     }
 
     @Command("list")
-    fun list(context: CommandContext<CommandSourceStack>): Int {
+    fun list(context: CommandContext<ServerCommandSource>): Int {
         val privateRooms = Blocktower.PRIVATE_ROOM_STORE.getPrivateRooms()
         if (privateRooms.isEmpty()) {
-            context.source.sendSuccess({ Component.literal("No private rooms found") }, false)
+            context.source.sendFeedback({ Text.literal("No private rooms found") }, false)
         }
         for (privateRoom in privateRooms) {
-            val output = Component.literal(privateRoom.name)
+            val output = Text.literal(privateRoom.name)
                 .append(" ")
-                .append(ComponentUtils.wrapInSquareBrackets(Component.literal("Remove"))
-                    .withStyle{
-                        it.withClickEvent(ClickEvent.RunCommand("/" + PRIVATE_ROOM_COMMAND + " remove " + privateRoom.id))
-                            .withHoverEvent(HoverEvent.ShowText(Component.literal("click to delete private room")))
-                            .applyFormat(ChatFormatting.GREEN)
-                    })
-                .append(" ")
-                .append(ComponentUtils.wrapInSquareBrackets(Component.literal("Copy ID"))
-                    .withStyle {
-                        it.withClickEvent(ClickEvent.CopyToClipboard(privateRoom.id.toString()))
-                            .withHoverEvent(HoverEvent.ShowText(Component.literal("click to copy private room id")))
-                            .applyFormat(ChatFormatting.GREEN)
-                    }
+                .append(Texts.bracketed(Text.literal("Remove"))
+                    .setStyle(
+                        Style.EMPTY.withClickEvent(ClickEvent.RunCommand("/" + PRIVATE_ROOM_COMMAND + " remove " + privateRoom.id))
+                            .withHoverEvent(HoverEvent.ShowText(Text.literal("click to delete private room")))
+                            .withColor(Formatting.GREEN)
+                    )
                 )
-            context.source.sendSuccess({ output }, false)
+                .append(" ")
+                .append(Texts.bracketed(Text.literal("Copy ID"))
+                    .setStyle(
+                        Style.EMPTY.withClickEvent(ClickEvent.CopyToClipboard(privateRoom.id.toString()))
+                            .withHoverEvent(HoverEvent.ShowText(Text.literal("click to copy private room id")))
+                            .withColor(Formatting.GREEN)
+                    )
+                )
+            context.source.sendFeedback({ output }, false)
         }
         return 1
     }

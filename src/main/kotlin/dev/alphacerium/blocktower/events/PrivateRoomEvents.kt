@@ -4,7 +4,7 @@ import dev.alphacerium.advancedgroups.core.PushGroup
 import dev.alphacerium.advancedgroups.core.ReleaseGroup
 import dev.alphacerium.blocktower.Blocktower
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.world.ServerWorld
 
 object PrivateRoomEvents {
     fun register() {
@@ -13,12 +13,12 @@ object PrivateRoomEvents {
         }
     }
 
-    private fun checkPlayers(world: ServerLevel) {
+    private fun checkPlayers(world: ServerWorld) {
         val rooms = Blocktower.PRIVATE_ROOM_STORE.getPrivateRooms()
         if (rooms.isEmpty()) return
 
-        for (player in world.players()) {
-            val pos = player.blockPosition()
+        for (player in world.players) {
+            val pos = player.blockPos
             for (room in rooms) {
                 when (pos) {
                     room.entrance -> {

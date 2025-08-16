@@ -1,7 +1,7 @@
 package dev.alphacerium.blocktower.config
 
 import de.maxhenkel.enhancedgroups.config.PersistentGroup
-import net.minecraft.core.BlockPos
+import net.minecraft.util.math.BlockPos
 import java.util.UUID
 
 class PrivateRoom(

@@ -23,7 +23,7 @@ object Blocktower : ModInitializer {
         val configFolder = Paths.get(".", "config").resolve(MOD_ID)
         PRIVATE_ROOM_STORE = PrivateRoomStore(configFolder.resolve("private-rooms.json").toFile())
 
-        CommandRegistrationCallback.EVENT.register{ dispatcher, registryAccess, environment -> MinecraftAdmiral.builder(dispatcher, registryAccess)
+        CommandRegistrationCallback.EVENT.register{ dispatcher, registryAccess, _ -> MinecraftAdmiral.builder(dispatcher, registryAccess)
             .addCommandClasses(
                 PrivateRoomCommands::class.java
             )
