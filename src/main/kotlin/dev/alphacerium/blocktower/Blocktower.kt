@@ -4,6 +4,7 @@ import de.maxhenkel.admiral.MinecraftAdmiral
 import dev.alphacerium.blocktower.command.PrivateRoomCommands
 import dev.alphacerium.blocktower.config.PrivateRoomStore
 import dev.alphacerium.blocktower.events.PrivateRoomEvents
+import dev.alphacerium.blocktower.networking.payloads.LocationHighlightPayload
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import org.slf4j.Logger
@@ -29,6 +30,10 @@ object Blocktower : ModInitializer {
             )
             .build()
         }
+        // EVENTS
         PrivateRoomEvents.register()
+
+        // PAYLOADS
+        LocationHighlightPayload.register()
     }
 }
