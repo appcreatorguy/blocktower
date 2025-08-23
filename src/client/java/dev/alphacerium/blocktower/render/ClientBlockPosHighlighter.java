@@ -45,17 +45,17 @@ public class ClientBlockPosHighlighter {
 
         matrixStack.push();
         Tessellator tess = Tessellator.getInstance();
-        BufferBuilder buff = tess.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
 
         Vec3d cameraPos = context.camera().getPos();
         matrixStack.translate(-cameraPos.getX(), -cameraPos.getY(), -cameraPos.getZ());
 
         for (BlockPosColor blockPosColor : BlocktowerClient.RENDER_QUEUE) {
+            BufferBuilder buff = tess.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
             renderBlock(buff, matrixStack.peek().getPositionMatrix(), blockPosColor);
+            var builtBuff = buff.endNullable();
+            if (builtBuff != null) renderLayer.draw(builtBuff);
         }
 
-        var builtBuff = buff.endNullable();
-        if (builtBuff != null) renderLayer.draw(builtBuff);
         matrixStack.pop();
     }
 
@@ -77,29 +77,30 @@ public class ClientBlockPosHighlighter {
         buffer.vertex(matrix, minBlockX, maxBlockY, maxBlockZ).color(blockPosColor.color());
         buffer.vertex(matrix, minBlockX, maxBlockY, minBlockZ).color(blockPosColor.color());
 
-        // BOTTOM FACE (minBlockY)
-        buffer.vertex(matrix, maxBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, maxBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, minBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, minBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, minBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, minBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, maxBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
-
         // EDGE 1
         buffer.vertex(matrix, maxBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
         buffer.vertex(matrix, maxBlockX, maxBlockY, maxBlockZ).color(blockPosColor.color());
 
         // EDGE 2
-        buffer.vertex(matrix, maxBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, maxBlockX, maxBlockY, maxBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, maxBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, maxBlockX, maxBlockY, minBlockZ).color(blockPosColor.color());
 
         // EDGE 3
         buffer.vertex(matrix, minBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
         buffer.vertex(matrix, minBlockX, maxBlockY, maxBlockZ).color(blockPosColor.color());
 
         // EDGE 4
+        buffer.vertex(matrix, minBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, minBlockX, maxBlockY, minBlockZ).color(blockPosColor.color());
+
+        // BOTTOM FACE (minBlockY)
+        buffer.vertex(matrix, maxBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, maxBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, maxBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
         buffer.vertex(matrix, minBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
-        buffer.vertex(matrix, minBlockX, maxBlockY, maxBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, minBlockX, minBlockY, maxBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, minBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, minBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
+        buffer.vertex(matrix, maxBlockX, minBlockY, minBlockZ).color(blockPosColor.color());
     }
 }
